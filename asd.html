@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>German Universities Filter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .filter label {
+      margin-right: 10px;
+    }
+    input, select {
+      padding: 5px;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+
+<h1>German Universities Admission Filter</h1>
+
+<div class="filter">
+  <label>
+    IELTS Required:
+    <select id="ieltsRequired">
+      <option value="any">Any</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+  </label>
+
+  <label>
+    Min IELTS Score:
+    <input type="number" id="ieltsScore" step="0.5" min="0" placeholder="e.g. 6.5">
+  </label>
+
+  <label>
+    Max Acceptable CGPA:
+    <input type="number" id="cgpa" step="0.1" min="0" max="4" placeholder="e.g. 3.0">
+  </label>
+
+  <label>
+    English Proficiency Cert:
+    <select id="englishCert">
+      <option value="any">Any</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+  </label>
+
+  <label>
+    University Type:
+    <select id="universityType">
+      <option value="any">Any</option>
+      <option value="public">Public</option>
+      <option value="private">Private</option>
+    </select>
+  </label>
+
+  <label>
+    Apply Via:
+    <select id="applyVia">
+      <option value="any">Any</option>
+      <option value="online">Online</option>
+      <option value="by post">By Post</option>
+      <option value="uni-assist">Uni-Assist</option>
+    </select>
+  </label>
+
+  <button onclick="applyFilters()">Apply Filters</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>University</th>
+      <th>IELTS Required</th>
+      <th>IELTS Score</th>
+      <th>Minimum CGPA</th>
+      <th>English Cert</th>
+      <th>Type</th>
+      <th>Apply Via</th>
+    </tr>
+  </thead>
+  <tbody id="universityList"></tbody>
+</table>
+
+<script>
+const universities = [
+  {
+    name: "Technical University of Munich",
+    ieltsRequired: true,
+    ieltsScore: 6.5,
+    cgpa: 3.0,
+    englishCert: true,
+    type: "public",
+    applyVia: "uni-assist"
+  },
+  {
+    name: "Heidelberg University",
+    ieltsRequired: false,
+    ieltsScore: null,
+    cgpa: 2.7,
+    englishCert: true,
+    type: "public",
+    applyVia: "by post"
+  },
+  {
+    name: "LMU Munich",
+    ieltsRequired: true,
+    ieltsScore: 7.0,
+    cgpa: 3.2,
+    englishCert: true,
+    type: "public",
+    applyVia: "online"
+  },
+  {
+    name: "RWTH Aachen University",
+    ieltsRequired: true,
+    ieltsScore: 6.0,
+    cgpa: 2.5,
+    englishCert: false,
+    type: "public",
+    applyVia: "uni-assist"
+  },
+  {
+    name: "University of Freiburg",
+    ieltsRequired: false,
+    ieltsScore: null,
+    cgpa: 2.8,
+    englishCert: true,
+    type: "private",
+    applyVia: "online"
+  }
+];
+
+function displayUniversities(list) {
+  const tbody = document.getElementById('universityList');
+  tbody.innerHTML = "";
+  list.forEach(u => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.ieltsRequired ? "Yes" : "No"}</td>
+        <td>${u.ieltsScore ?? "-"}</td>
+        <td>${u.cgpa}</td>
+        <td>${u.englishCert ? "Yes" : "No"}</td>
+        <td>${u.type.charAt(0).toUpperCase() + u.type.slice(1)}</td>
+        <td>${u.applyVia.charAt(0).toUpperCase() + u.applyVia.slice(1)}</td>
+      </tr>
+    `;
+  });
+}
+
+function applyFilters() {
+  const ieltsRequired = document.getElementById('ieltsRequired').value;
+  const ieltsScore = parseFloat(document.getElementById('ieltsScore').value);
+  const maxCgpa = parseFloat(document.getElementById('cgpa').value);
+  const englishCert = document.getElementById('englishCert').value;
+  const universityType = document.getElementById('universityType').value;
+  const applyVia = document.getElementById('applyVia').value;
+
+  const filtered = universities.filter(u => {
+    if (ieltsRequired === "yes" && !u.ieltsRequired) return false;
+    if (ieltsRequired === "no" && u.ieltsRequired) return false;
+    if (!isNaN(ieltsScore) && (!u.ieltsScore || u.ieltsScore < ieltsScore)) return false;
+    if (!isNaN(maxCgpa) && u.cgpa > maxCgpa) return false;
+    if (englishCert === "yes" && !u.englishCert) return false;
+    if (englishCert === "no" && u.englishCert) return false;
+    if (universityType !== "any" && u.type !== universityType) return false;
+    if (applyVia !== "any" && u.applyVia !== applyVia) return false;
+    return true;
+  });
+
+  displayUniversities(filtered);
+}
+
+window.onload = () => displayUniversities(universities);
+</script>
+
+</body>
+</html>
